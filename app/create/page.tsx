@@ -1006,11 +1006,21 @@ export default function CreatePage() {
         position: 'sticky', top: 0, zIndex: 50,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: wide ? 15 : 14, fontWeight: 700, color: C.accent, letterSpacing: '0.03em' }}>
-            🌸 母親節祝福卡片
-          </h1>
-          {wide && <p style={{ margin: '1px 0 0', fontSize: 10, color: C.sub }}>製作專屬賀卡，手機直接傳 LINE 給媽媽</p>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* 公司 Logo */}
+          <img
+            src="/logo.png"
+            alt="Skynet"
+            style={{ height: wide ? 42 : 32, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
+          />
+          {/* 細分隔線 */}
+          <div style={{ width: 1, height: wide ? 28 : 22, background: C.border, flexShrink: 0 }}/>
+          <div>
+            <h1 style={{ margin: 0, fontSize: wide ? 15 : 14, fontWeight: 700, color: C.accent, letterSpacing: '0.03em' }}>
+              🌸 母親節祝福卡片
+            </h1>
+            {wide && <p style={{ margin: '1px 0 0', fontSize: 10, color: C.sub }}>製作專屬賀卡，手機直接傳 LINE 給媽媽</p>}
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: wide ? 8 : 6 }}>
           {/* 即時數據（桌機版才顯示）*/}
