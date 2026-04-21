@@ -1,7 +1,7 @@
 import type { Employee } from '@/types';
 
 // ============================================================
-// 員工資料（共 30 位）
+// 員工資料（共 31 位）
 // ============================================================
 // TODO: [Lark SSO 串接點] 未來由 Lark OAuth API 動態取得
 // ============================================================
@@ -31,6 +31,7 @@ const employeeData: { name: string; dept: string; image: string; color: string }
   { name: 'Naomi',   dept: '行銷企劃部', image: '/characters/Naomi.png',   color: '#F9A8D4' },
   { name: 'Nick',    dept: '數位創新部', image: '/characters/Nick.png',    color: '#6EE7B7' },
   { name: 'Noah',    dept: '產品設計部', image: '/characters/Noah.png',    color: '#A5F3FC' },
+  { name: 'Oliver',  dept: '',          image: '/characters/Oliver.png',  color: '#FCD34D' },
   { name: 'Pun',     dept: '設計創意部', image: '/characters/Pun.png',     color: '#FECDD3' },
   { name: 'River',   dept: '產品設計部', image: '/characters/River.png',   color: '#A5F3FC' },
   { name: 'Robin',   dept: '法務合規部', image: '/characters/Robin.png',   color: '#BBF7D0' },

@@ -24,8 +24,19 @@ export default function LandingPage() {
     checkSize();
     window.addEventListener('resize', checkSize);
     const t = setTimeout(() => setReady(true), 100);
+
+    // 點連結進來就計一次造訪（session 內只算一次）
+    if (!sessionStorage.getItem('md-visited')) {
+      sessionStorage.setItem('md-visited', '1');
+      fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'visit' }),
+      }).catch(() => {});
+    }
     // 取得訪問數顯示在首頁
     fetch('/api/stats').then(r => r.json()).then(d => setVisits(d.visits || 0)).catch(() => {});
+
     return () => { clearTimeout(t); window.removeEventListener('resize', checkSize); };
   }, []);
 

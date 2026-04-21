@@ -112,6 +112,7 @@ export default function CreatePage() {
 
   // 預覽燈箱
   const [previewUrl,     setPreviewUrl]     = useState<string | null>(null);
+  const [previewBlob,    setPreviewBlob]    = useState<Blob | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
   // 引導 onboarding
@@ -130,7 +131,7 @@ export default function CreatePage() {
     } catch { /* 靜默失敗，不影響主功能 */ }
   }, []);
 
-  // 進入頁面：計 +1 訪問（每個 session 只算一次）
+  // 進入製作頁：若從首頁來已計過，直接跳過；直接連到 /create 才補計
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!sessionStorage.getItem('md-visited')) {
@@ -371,7 +372,10 @@ export default function CreatePage() {
     await new Promise((r) => setTimeout(r, 80)); // 等 React re-render（清選取框）
     try {
       const canvas = await captureCard();
-      if (canvas) setPreviewUrl(canvas.toDataURL('image/png', 1.0));
+      if (canvas) {
+        setPreviewUrl(canvas.toDataURL('image/png', 1.0));
+        canvas.toBlob((blob) => { if (blob) setPreviewBlob(blob); }, 'image/png');
+      }
     } finally {
       setPreviewLoading(false);
     }
@@ -382,17 +386,48 @@ export default function CreatePage() {
       .then(() => fetchStats()).catch(() => {});
   }, [fetchStats]);
 
-  const handleConfirmSave = useCallback(async () => {
-    if (!previewUrl) return;
+  const closePreview = useCallback(() => {
     setPreviewUrl(null);
+    setPreviewBlob(null);
+  }, []);
+
+  // 彈窗內：儲存圖片
+  const handleConfirmSave = useCallback(async () => {
+    if (!previewBlob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(previewBlob);
+    a.download = `母親節卡片_${employee.name}.png`;
+    a.click();
+    closePreview();
     launchConfetti();
-    const link = document.createElement('a');
-    link.download = `母親節卡片_${employee.name}.png`;
-    link.href = previewUrl;
-    link.click();
     setShareMsg('✅ 已儲存！開啟 LINE 選取圖片傳給媽媽吧 💌');
     trackSave();
-  }, [previewUrl, employee.name, trackSave]);
+  }, [previewBlob, employee.name, trackSave, closePreview]);
+
+  // 彈窗內：分享到 LINE
+  const handleModalShareLine = useCallback(async () => {
+    if (!previewBlob) return;
+    const file = new File([previewBlob], `母親節卡片_${employee.name}.png`, { type: 'image/png' });
+    const shareData = { files: [file], title: '母親節快樂 🌸', text };
+    if (navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData);
+        closePreview();
+        launchConfetti();
+        trackSave();
+        return;
+      } catch { return; } // 使用者取消
+    }
+    // fallback：下載並提示
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(previewBlob);
+    a.download = file.name;
+    a.click();
+    closePreview();
+    launchConfetti();
+    setShareMsg('✅ 圖片已儲存！請開啟 LINE → 選取照片傳給媽媽 💌');
+    trackSave();
+  }, [previewBlob, employee.name, text, trackSave, closePreview]);
 
   const handleShareLine = useCallback(async () => {
     if (!posterRef.current) return;
@@ -441,24 +476,15 @@ export default function CreatePage() {
     <div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 0', overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: `${C.border} transparent` }}>
 
       {/* ── 角色選擇 ── */}
-      <div style={{ padding: '12px 12px 10px' }}>
-        {/* 標題 + 目前選取 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: '0.08em', textTransform: 'uppercase' }}>選擇你的角色</p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-            padding: '3px 8px', borderRadius: 20,
-            background: `linear-gradient(135deg,${C.light},#FFF0F7)`,
-            border: `1px solid ${C.border}` }}>
-            <div style={{ width: 18, height: 18, borderRadius: 4, overflow: 'hidden', background: '#fff' }}>
-              <img src={employee.characterImage} alt={employee.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: C.accent }}>{employee.name}</span>
-          </div>
-        </div>
+      <div style={{ padding: '10px 10px 8px' }}>
+        <p style={{ margin: '0 0 7px', fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          選擇你的角色
+          <span style={{ marginLeft: 6, fontWeight: 500, color: C.pink, fontSize: 9 }}>— {employee.name}</span>
+        </p>
 
-        {/* 角色格子 5欄 */}
+        {/* 角色格子 6欄 */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 5,
+          display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4,
           overflowY: 'auto', scrollbarWidth: 'thin',
           scrollbarColor: `${C.border} transparent`,
         }}>
@@ -471,8 +497,9 @@ export default function CreatePage() {
                 background: on ? C.light : 'transparent',
                 border: `1.5px solid ${on ? C.accent : C.border}`,
                 cursor: 'pointer', transition: 'all 0.15s',
+                boxShadow: on ? `0 0 0 2px ${C.accent}30` : 'none',
               }}>
-                <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', background: '#F5EEF2' }}>
+                <div style={{ width: 38, height: 38, borderRadius: 8, overflow: 'hidden', background: '#F5EEF2' }}>
                   <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
                 </div>
                 <span style={{ fontSize: 7, fontWeight: on ? 700 : 400, color: on ? C.accent : C.sub, whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis' }}>{emp.name}</span>
@@ -493,18 +520,18 @@ export default function CreatePage() {
             <button onClick={() => setRobots([])} style={chipBtnStyle}>清除（{robots.length}）</button>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7 }}>
           {ROBOT_OPTIONS.filter((r) => r.id !== 'none').map((r) => (
             <button key={r.id} onClick={() => addRobot(r.id)} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-              padding: '7px 3px', borderRadius: 10, background: '#F9F4F7',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              padding: '9px 4px', borderRadius: 12, background: '#F9F4F7',
               border: `1px solid ${C.border}`, cursor: 'pointer', transition: 'all 0.15s',
             }}
               onMouseEnter={(e) => { e.currentTarget.style.background = C.light; e.currentTarget.style.borderColor = C.pink; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#F9F4F7'; e.currentTarget.style.borderColor = C.border; }}
             >
-              <img src={r.src} alt={r.name} style={{ width: 38, height: 38, objectFit: 'contain' }}/>
-              <span style={{ fontSize: 8, color: C.sub, textAlign: 'center', lineHeight: 1.2 }}>{r.name}</span>
+              <img src={r.src} alt={r.name} style={{ width: 54, height: 54, objectFit: 'contain' }}/>
+              <span style={{ fontSize: 9, color: C.sub, textAlign: 'center', lineHeight: 1.2 }}>{r.name}</span>
             </button>
           ))}
         </div>
@@ -615,20 +642,13 @@ export default function CreatePage() {
       <Section title="儲存分享" wide={wide} grow>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minHeight: 0 }}>
           <button onClick={handlePreview} disabled={previewLoading} style={{
-            padding: '11px 0', borderRadius: 12, fontSize: 13, fontWeight: 800, color: '#fff',
+            padding: '13px 0', borderRadius: 12, fontSize: 13, fontWeight: 800, color: '#fff',
             background: previewLoading ? 'rgba(201,78,122,0.4)' : `linear-gradient(135deg,${C.accent},#A33B61)`,
             border: 'none', cursor: previewLoading ? 'wait' : 'pointer',
             boxShadow: `0 5px 18px ${C.accent}40`,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
           }}>
-            <span style={{ fontSize: 17 }}>👁️</span>{previewLoading ? '生成預覽中…' : '預覽 ／ 儲存卡片'}
-          </button>
-          <button onClick={handleShareLine} style={{
-            padding: '9px 0', borderRadius: 12, fontSize: 12, fontWeight: 700, color: C.accent,
-            background: C.light, border: `1.5px solid ${C.border}`, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          }}>
-            <span style={{ fontSize: 16 }}>📲</span> 直接分享到 LINE
+            <span style={{ fontSize: 18 }}>🌸</span>{previewLoading ? '生成預覽中…' : '預覽 & 分享卡片'}
           </button>
           {shareMsg && (
             <p style={{ margin: 0, fontSize: 11, color: C.accent, fontWeight: 700, textAlign: 'center', padding: '7px 10px', borderRadius: 9, background: C.light, border: `1px solid ${C.border}` }}>{shareMsg}</p>
@@ -754,23 +774,28 @@ export default function CreatePage() {
         </div>
       </div>
 
-      {/* 角色橫列 */}
+      {/* 角色格子（手機版 4 欄） */}
       <div style={{ padding: '8px 0' }}>
-        <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: '0.06em' }}>選擇角色</p>
-        <div style={{ display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none' }}>
+        <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, color: C.sub, letterSpacing: '0.06em' }}>
+          選擇角色
+          <span style={{ marginLeft: 6, fontWeight: 500, color: C.pink, fontSize: 9 }}>— {employee.name}</span>
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
           {employeeProfiles.map((emp) => {
             const on = emp.id === employee.id;
             return (
               <button key={emp.id} onClick={() => pickEmployee(emp)} style={{
-                flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                padding: '6px 8px', borderRadius: 12,
-                background: on ? C.light : 'transparent',
-                border: `1.5px solid ${on ? C.accent : C.border}`, cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                padding: '7px 4px', borderRadius: 12,
+                background: on ? C.light : '#FAFAFA',
+                border: `1.5px solid ${on ? C.accent : C.border}`,
+                cursor: 'pointer', transition: 'all 0.15s',
+                boxShadow: on ? `0 0 0 2px ${C.accent}30` : 'none',
               }}>
-                <div style={{ width: 40, height: 40, borderRadius: 9, overflow: 'hidden', background: '#F5EEF2' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', background: '#F5EEF2' }}>
                   <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: on ? 700 : 500, color: on ? C.accent : C.sub }}>{emp.name}</span>
+                <span style={{ fontSize: 9, fontWeight: on ? 700 : 500, color: on ? C.accent : C.sub }}>{emp.name}</span>
               </button>
             );
           })}
@@ -840,8 +865,8 @@ export default function CreatePage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7 }}>
               {ROBOT_OPTIONS.filter((r) => r.id !== 'none').map((r) => (
-                <button key={r.id} onClick={() => addRobot(r.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '7px 4px', borderRadius: 10, background: '#F9F4F7', border: `1px solid ${C.border}`, cursor: 'pointer' }}>
-                  <img src={r.src} alt={r.name} style={{ width: 38, height: 38, objectFit: 'contain' }}/>
+                <button key={r.id} onClick={() => addRobot(r.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '9px 4px', borderRadius: 12, background: '#F9F4F7', border: `1px solid ${C.border}`, cursor: 'pointer' }}>
+                  <img src={r.src} alt={r.name} style={{ width: 48, height: 48, objectFit: 'contain' }}/>
                   <span style={{ fontSize: 9, color: C.sub, textAlign: 'center' }}>{r.name}</span>
                 </button>
               ))}
@@ -914,18 +939,12 @@ export default function CreatePage() {
         {mTab === 'save' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', paddingTop: 8 }}>
             <button onClick={handlePreview} disabled={previewLoading} style={{
-              width: '100%', padding: '13px 0', borderRadius: 14, fontSize: 14, fontWeight: 800, color: '#fff',
-              background: `linear-gradient(135deg,${C.accent},#A33B61)`, border: 'none', cursor: 'pointer',
+              width: '100%', padding: '15px 0', borderRadius: 14, fontSize: 15, fontWeight: 800, color: '#fff',
+              background: previewLoading ? 'rgba(201,78,122,0.4)' : `linear-gradient(135deg,${C.accent},#A33B61)`,
+              border: 'none', cursor: previewLoading ? 'wait' : 'pointer',
               boxShadow: `0 5px 18px ${C.accent}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}>
-              <span style={{ fontSize: 18 }}>👁️</span> {previewLoading ? '生成中…' : '預覽 ／ 儲存卡片'}
-            </button>
-            <button onClick={handleShareLine} style={{
-              width: '100%', padding: '11px 0', borderRadius: 14, fontSize: 13, fontWeight: 700, color: C.accent,
-              background: C.light, border: `1.5px solid ${C.border}`, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}>
-              <span style={{ fontSize: 16 }}>📲</span> 直接分享到 LINE
+              <span style={{ fontSize: 20 }}>🌸</span> {previewLoading ? '生成中…' : '預覽 & 分享卡片'}
             </button>
             {shareMsg && <p style={{ margin: 0, fontSize: 11, color: C.accent, fontWeight: 700, textAlign: 'center' }}>{shareMsg}</p>}
             <p style={{ margin: 0, fontSize: 9, color: C.sub, textAlign: 'center' }}>📱 選擇 LINE 傳送　💻 儲存後傳圖</p>
@@ -942,7 +961,7 @@ export default function CreatePage() {
                 <div style={{ flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 10, background: 'linear-gradient(135deg,#FFF0F7,#FFE8F3)', border: `1px solid ${C.border}` }}>
                   <p style={{ margin: 0, fontSize: 16 }}>💌</p>
                   <p style={{ margin: '2px 0 1px', fontSize: 17, fontWeight: 900, color: C.accent, lineHeight: 1 }}>{stats.saves.toLocaleString()}</p>
-                  <p style={{ margin: 0, fontSize: 9, color: C.sub }}>張卡片送出</p>
+                  <p style={{ margin: 0, fontSize: 9, color: C.sub }}>次傳出</p>
                 </div>
               </div>
             )}
@@ -992,7 +1011,7 @@ export default function CreatePage() {
               <span style={{ width: 1, height: 14, background: C.border, display: 'inline-block' }}/>
               <span style={{ fontSize: 11, color: C.sub, display: 'flex', alignItems: 'center', gap: 4 }}>
                 💌 <span style={{ fontWeight: 900, color: C.accent, fontSize: 13 }}>{stats.saves.toLocaleString()}</span>
-                <span style={{ fontSize: 9 }}>張送出</span>
+                <span style={{ fontSize: 9 }}>次傳出</span>
               </span>
             </div>
           )}
@@ -1045,33 +1064,53 @@ export default function CreatePage() {
       {previewUrl && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)',
+          background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          padding: 20,
+          padding: '16px',
         }}
-          onClick={(e) => { if (e.target === e.currentTarget) setPreviewUrl(null); }}
+          onClick={(e) => { if (e.target === e.currentTarget) closePreview(); }}
         >
           <div style={{
-            background: '#fff', borderRadius: 20, overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            background: '#fff', borderRadius: 22, overflow: 'hidden',
+            boxShadow: '0 24px 70px rgba(0,0,0,0.5)',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            maxWidth: 420, width: '100%',
+            maxWidth: 400, width: '100%',
+            maxHeight: 'calc(100dvh - 32px)',
           }}>
-            <img src={previewUrl} alt="卡片預覽" style={{ width: '100%', display: 'block' }}/>
-            <div style={{ padding: '16px 20px', width: '100%', boxSizing: 'border-box', display: 'flex', gap: 10 }}>
-              <button onClick={handleConfirmSave} style={{
-                flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 14, fontWeight: 800, color: '#fff',
-                background: `linear-gradient(135deg,${C.accent},#A33B61)`, border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            {/* 卡片預覽圖 */}
+            <div style={{ width: '100%', overflowY: 'auto', flexShrink: 1 }}>
+              <img src={previewUrl} alt="卡片預覽" style={{ width: '100%', display: 'block' }}/>
+            </div>
+
+            {/* 操作區 */}
+            <div style={{ padding: '14px 16px 16px', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {/* LINE 分享（主要） */}
+              <button onClick={handleModalShareLine} style={{
+                width: '100%', padding: '13px 0', borderRadius: 14, fontSize: 15, fontWeight: 800, color: '#fff',
+                background: `linear-gradient(135deg,#06C755,#04A244)`,
+                border: 'none', cursor: 'pointer',
+                boxShadow: '0 5px 18px rgba(6,199,85,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}>
-                <span style={{ fontSize: 18 }}>💾</span> 確認儲存
+                <span style={{ fontSize: 20 }}>📲</span> 分享到 LINE
               </button>
-              <button onClick={() => setPreviewUrl(null)} style={{
-                flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 14, fontWeight: 700, color: C.accent,
-                background: C.light, border: `1.5px solid ${C.border}`, cursor: 'pointer',
-              }}>
-                返回修改
-              </button>
+
+              {/* 次要操作 */}
+              <div style={{ display: 'flex', gap: 9 }}>
+                <button onClick={handleConfirmSave} style={{
+                  flex: 1, padding: '11px 0', borderRadius: 12, fontSize: 13, fontWeight: 700, color: C.accent,
+                  background: C.light, border: `1.5px solid ${C.border}`, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                }}>
+                  <span style={{ fontSize: 15 }}>💾</span> 儲存圖片
+                </button>
+                <button onClick={closePreview} style={{
+                  flex: 1, padding: '11px 0', borderRadius: 12, fontSize: 13, fontWeight: 600, color: C.sub,
+                  background: '#F5F0F3', border: `1px solid ${C.border}`, cursor: 'pointer',
+                }}>
+                  ← 返回修改
+                </button>
+              </div>
             </div>
           </div>
         </div>
