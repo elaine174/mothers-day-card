@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     siteName: '母親節祝福卡片',
     images: [
       {
-        url: '/og-image.png',
+        url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
         alt: '母親節祝福卡片',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '母親節祝福卡片 🌸',
     description: '做一張專屬賀卡，直接從手機傳 LINE 給媽媽！',
-    images: ['/og-image.png'],
+    images: [`${BASE_URL}/og-image.png`],
   },
 };
 
