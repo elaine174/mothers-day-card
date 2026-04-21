@@ -4,7 +4,7 @@ import type { RobotOption } from '@/types';
 
 export const ROBOT_OPTIONS: RobotOption[] = [
   { id: 'rabbit',   name: '兔子',    src: '/robots/兔子.png',    defaultRotation: -6 },
-  { id: 'ilovemom', name: '我愛媽媽', src: '/robots/我愛媽媽.png', defaultRotation: 5  },
+  { id: 'angel',    name: '小天使',  src: '/robots/小天使.png',  defaultRotation: -3 },
   { id: 'dog',      name: '狗狗',    src: '/robots/狗狗.png',    defaultRotation: -4 },
   { id: 'gift',     name: '禮物盒',  src: '/robots/禮物盒.png',  defaultRotation: 6  },
   { id: 'cat',      name: '貓咪',    src: '/robots/貓咪.png',    defaultRotation: -5 },
@@ -13,6 +13,8 @@ export const ROBOT_OPTIONS: RobotOption[] = [
   { id: 'bear',     name: '小熊熊',  src: '/robots/小熊熊.png',  defaultRotation: 5  },
   { id: 'heartbox', name: '愛心盒',  src: '/robots/愛心盒.png',  defaultRotation: -4 },
   { id: 'flower',   name: '鮮花',    src: '/robots/鮮花.png',    defaultRotation: 8  },
+  { id: 'rainbow',  name: '彩虹',    src: '/robots/彩虹.png',    defaultRotation: 5  },
+  { id: 'star',     name: '星星',    src: '/robots/星星.png',    defaultRotation: 8  },
   { id: 'none',     name: '不加素材', src: '',                   defaultRotation: 0  },
 ];
 
