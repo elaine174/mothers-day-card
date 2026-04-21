@@ -395,29 +395,43 @@ export default function CreatePage() {
   }, [previewUrl, employee.name, trackSave]);
 
   const handleShareLine = useCallback(async () => {
-    if (!posterRef.current) return; setShareMsg('');
+    if (!posterRef.current) return;
+    setShareMsg('');
     setSelectedRobotId(null);
     await new Promise((r) => setTimeout(r, 80));
     try {
       const canvas = await captureCard();
       if (!canvas) return;
-      if (navigator.share) {
-        canvas.toBlob(async (blob) => {
-          if (!blob) return;
-          const file = new File([blob], `母親節卡片_${employee.name}.png`, { type: 'image/png' });
-          try { await navigator.share({ files: [file], title: '母親節快樂 🌸', text }); }
-          catch {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `母親節卡片_${employee.name}.png`, { type: 'image/png' });
+
+        // 嘗試 Web Share API（支援 iOS Safari / Android Chrome）
+        const shareData = { files: [file], title: '母親節快樂 🌸', text };
+        if (navigator.canShare?.(shareData)) {
+          try {
+            await navigator.share(shareData);
+            launchConfetti();
+            trackSave();
+            return;
+          } catch {
+            // 使用者取消分享，不做任何事
+            return;
           }
-          launchConfetti();
-          trackSave();
-        }, 'image/png');
-      } else {
-        await handlePreview();
-      }
+        }
+
+        // 不支援 Web Share API → 直接下載，提示去 LINE 傳
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = file.name;
+        a.click();
+        launchConfetti();
+        setShareMsg('✅ 圖片已儲存！請開啟 LINE → 選取照片傳給媽媽 💌');
+        trackSave();
+      }, 'image/png');
     } catch (e) { console.error(e); alert('儲存失敗，請稍後再試。'); }
-  }, [employee.name, text, handlePreview, trackSave]);
+  }, [employee.name, text, captureCard, trackSave]);
 
   const employeeWithCustomName = { ...employee, name: customName || employee.name };
   const bgSrc = BG_TEMPLATES[bgIndex].src;
