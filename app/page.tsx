@@ -17,9 +17,14 @@ export default function LandingPage() {
   const [btnHover, setBtnHover] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [visits,   setVisits]   = useState(0);
+  const [isInApp,  setIsInApp]  = useState(false);
 
   useEffect(() => {
     setDaysLeft(getDaysLeft());
+    // 偵測 Lark / LINE / WeChat 等 in-app 瀏覽器
+    const ua = navigator.userAgent;
+    const inApp = /Lark|BytedanceMicroApp|BytedanceWebview|MicroMessenger|FBAN|FBAV|Line\//.test(ua);
+    setIsInApp(inApp);
     const checkSize = () => setIsMobile(window.innerWidth < 640);
     checkSize();
     window.addEventListener('resize', checkSize);
@@ -46,6 +51,31 @@ export default function LandingPage() {
       position: 'relative', overflow: 'hidden',
       fontFamily: '"Noto Sans TC","PingFang TC",system-ui,sans-serif',
     }}>
+
+      {/* ── Lark / In-app 瀏覽器提示 ── */}
+      {isInApp && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100,
+          background: 'rgba(30,20,10,0.88)', backdropFilter: 'blur(8px)',
+          padding: '14px 20px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        }}>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#FFD580', textAlign: 'center' }}>
+            ⚠️ 請用預設瀏覽器開啟
+          </p>
+          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 1.7 }}>
+            在 Lark 內無法儲存照片或分享 LINE
+          </p>
+          <div style={{
+            marginTop: 2, padding: '8px 16px', borderRadius: 10,
+            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+            fontSize: 12, color: '#fff', lineHeight: 1.8, textAlign: 'center',
+          }}>
+            📱 iOS：右上角 <b>⋯</b> → <b>在 Safari 中開啟</b><br/>
+            🤖 Android：右上角 <b>⋯</b> → <b>用瀏覽器開啟</b>
+          </div>
+        </div>
+      )}
 
       {/* ── 背景圖：限制最大顯示高度，桌機不全占滿螢幕 ── */}
       <img
