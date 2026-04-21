@@ -147,6 +147,23 @@ export default function LandingPage() {
         }}>
           選角色 ・ 換背景 ・ 一鍵生成祝福語 ・ 分享 LINE
         </p>
+
+        {/* 造訪人數 */}
+        {visits > 0 && (
+          <div style={{
+            marginTop: isMobile ? 10 : 12,
+            display: 'flex', alignItems: 'center', gap: 5,
+            padding: '4px 14px', borderRadius: 100,
+            background: 'rgba(255,255,255,0.7)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(201,78,122,0.15)',
+          }}>
+            <span style={{ fontSize: isMobile ? 11 : 12 }}>🌸</span>
+            <span style={{ fontSize: isMobile ? 11 : 12, color: '#C94E7A', fontWeight: 700 }}>{visits.toLocaleString()}</span>
+            <span style={{ fontSize: isMobile ? 10 : 11, color: '#A07090' }}>人已來製作</span>
+          </div>
+        )}
+
       </div>
     </div>
   );

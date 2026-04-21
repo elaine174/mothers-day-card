@@ -482,27 +482,25 @@ export default function CreatePage() {
           <span style={{ marginLeft: 6, fontWeight: 500, color: C.pink, fontSize: 9 }}>— {employee.name}</span>
         </p>
 
-        {/* 角色格子 6欄 */}
+        {/* 角色格子 4欄 */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4,
-          overflowY: 'auto', scrollbarWidth: 'thin',
-          scrollbarColor: `${C.border} transparent`,
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6,
         }}>
           {employeeProfiles.map((emp) => {
             const on = emp.id === employee.id;
             return (
               <button key={emp.id} onClick={() => pickEmployee(emp)} title={emp.name} style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                padding: '5px 2px', borderRadius: 10,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                padding: '7px 4px', borderRadius: 12,
                 background: on ? C.light : 'transparent',
                 border: `1.5px solid ${on ? C.accent : C.border}`,
                 cursor: 'pointer', transition: 'all 0.15s',
                 boxShadow: on ? `0 0 0 2px ${C.accent}30` : 'none',
               }}>
-                <div style={{ width: 38, height: 38, borderRadius: 8, overflow: 'hidden', background: '#F5EEF2' }}>
+                <div style={{ width: '100%', aspectRatio: '1 / 1.2', borderRadius: 10, overflow: 'hidden', background: '#F5EEF2' }}>
                   <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
                 </div>
-                <span style={{ fontSize: 7, fontWeight: on ? 700 : 400, color: on ? C.accent : C.sub, whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis' }}>{emp.name}</span>
+                <span style={{ fontSize: 10, fontWeight: on ? 700 : 400, color: on ? C.accent : C.sub, whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis' }}>{emp.name}</span>
               </button>
             );
           })}
@@ -531,18 +529,18 @@ export default function CreatePage() {
               onMouseLeave={(e) => { e.currentTarget.style.background = '#F9F4F7'; e.currentTarget.style.borderColor = C.border; }}
             >
               <img src={r.src} alt={r.name} style={{ width: 54, height: 54, objectFit: 'contain' }}/>
-              <span style={{ fontSize: 9, color: C.sub, textAlign: 'center', lineHeight: 1.2 }}>{r.name}</span>
+              <span style={{ fontSize: 11, color: C.sub, textAlign: 'center', lineHeight: 1.2 }}>{r.name}</span>
             </button>
           ))}
         </div>
         {robots.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
             {robots.map((rb) => (
-              <span key={rb.instanceId} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 20, background: C.surface, border: `1px solid ${C.border}`, fontSize: 9, color: C.sub }}>
-                <img src={rb.src} alt="" style={{ width: 12, height: 12, objectFit: 'contain' }}/>
+              <span key={rb.instanceId} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: C.light, border: `1.5px solid ${C.border}`, fontSize: 11, color: C.text, fontWeight: 500 }}>
+                <img src={rb.src} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }}/>
                 {rb.name}
                 <button onClick={() => setRobots((p) => p.filter((r) => r.instanceId !== rb.instanceId))}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 10, color: C.pink, fontWeight: 800, lineHeight: 1 }}>×</button>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 0 2px', fontSize: 13, color: C.pink, fontWeight: 800, lineHeight: 1 }}>×</button>
               </span>
             ))}
           </div>
@@ -650,13 +648,9 @@ export default function CreatePage() {
           }}>
             <span style={{ fontSize: 18 }}>🌸</span>{previewLoading ? '生成預覽中…' : '預覽 & 分享卡片'}
           </button>
-          {shareMsg && (
-            <p style={{ margin: 0, fontSize: 11, color: C.accent, fontWeight: 700, textAlign: 'center', padding: '7px 10px', borderRadius: 9, background: C.light, border: `1px solid ${C.border}` }}>{shareMsg}</p>
-          )}
-          <p style={{ margin: 0, fontSize: 9, color: C.sub, textAlign: 'center', lineHeight: 1.7 }}>📱 手機：選擇 LINE 傳送　💻 電腦：儲存後傳圖</p>
 
           {/* 吉祥物 — 填滿剩餘空間 */}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <div style={{ flex: 1, minHeight: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img
               src="/mascot.png"
               alt=""
@@ -844,14 +838,21 @@ export default function CreatePage() {
 
       {/* Tabs */}
       <div style={{ display: 'flex', borderRadius: '12px 12px 0 0', background: C.surface, border: `1px solid ${C.border}`, borderBottom: 'none', overflow: 'hidden' }}>
-        {([['asset','🎁','素材包'],['text','✍️','祝福語'],['save','💌','儲存分享']] as const).map(([id, icon, label]) => (
+        {([
+          ['asset', '🎁', '素材包', '①'],
+          ['text',  '✍️', '祝福語', '②'],
+          ['save',  '💌', '儲存分享','③'],
+        ] as const).map(([id, icon, label, step]) => (
           <button key={id} onClick={() => setMTab(id)} style={{
             flex: 1, padding: '10px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             border: 'none', borderBottom: mTab === id ? `2.5px solid ${C.accent}` : '2.5px solid transparent',
             background: mTab === id ? C.light : 'transparent', cursor: 'pointer',
           }}>
-            <span style={{ fontSize: 16 }}>{icon}</span>
-            <span style={{ fontSize: 10, fontWeight: mTab === id ? 700 : 500, color: mTab === id ? C.accent : C.sub }}>{label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ fontSize: 15 }}>{icon}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: mTab === id ? C.accent : 'rgba(160,112,144,0.5)' }}>{step}</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: mTab === id ? 700 : 500, color: mTab === id ? C.accent : C.sub }}>{label}</span>
           </button>
         ))}
       </div>
@@ -867,7 +868,7 @@ export default function CreatePage() {
               {ROBOT_OPTIONS.filter((r) => r.id !== 'none').map((r) => (
                 <button key={r.id} onClick={() => addRobot(r.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '9px 4px', borderRadius: 12, background: '#F9F4F7', border: `1px solid ${C.border}`, cursor: 'pointer' }}>
                   <img src={r.src} alt={r.name} style={{ width: 48, height: 48, objectFit: 'contain' }}/>
-                  <span style={{ fontSize: 9, color: C.sub, textAlign: 'center' }}>{r.name}</span>
+                  <span style={{ fontSize: 11, color: C.sub, textAlign: 'center' }}>{r.name}</span>
                 </button>
               ))}
             </div>
@@ -884,7 +885,7 @@ export default function CreatePage() {
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                 }}>
                   <span style={{ fontSize: 13 }}>{t.icon}</span>
-                  <span style={{ fontSize: 8, fontWeight: blessingTheme === t.id ? 700 : 500, color: blessingTheme === t.id ? C.accent : C.sub, textAlign: 'center', lineHeight: 1.2 }}>{t.label}</span>
+                  <span style={{ fontSize: 10, fontWeight: blessingTheme === t.id ? 700 : 500, color: blessingTheme === t.id ? C.accent : C.sub, textAlign: 'center', lineHeight: 1.2 }}>{t.label}</span>
                 </button>
               ))}
             </div>
@@ -902,7 +903,9 @@ export default function CreatePage() {
                 placeholder="媽媽，謝謝妳一直以來的照顧與陪伴..." rows={3}
                 style={{ width: '100%', padding: '10px 11px', resize: 'none', outline: 'none', border: 'none', background: '#fff', fontFamily: '"Noto Sans TC",sans-serif', fontSize: 13, color: C.text, lineHeight: 1.75, boxSizing: 'border-box' }}/>
               <div style={{ padding: '3px 10px', background: '#FBF3F7', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'flex-end' }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: text.length > MAX_CHARS * 0.9 ? '#E04' : C.sub }}>{text.length}/{MAX_CHARS}</span>
+                {text.length > MAX_CHARS * 0.8 && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: text.length >= MAX_CHARS ? '#E04' : '#E08020' }}>{MAX_CHARS - text.length} 字可用</span>
+                )}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 11px', borderRadius: 10, background: '#FBF3F7', border: `1px solid ${C.border}` }}>
@@ -946,8 +949,6 @@ export default function CreatePage() {
             }}>
               <span style={{ fontSize: 20 }}>🌸</span> {previewLoading ? '生成中…' : '預覽 & 分享卡片'}
             </button>
-            {shareMsg && <p style={{ margin: 0, fontSize: 11, color: C.accent, fontWeight: 700, textAlign: 'center' }}>{shareMsg}</p>}
-            <p style={{ margin: 0, fontSize: 9, color: C.sub, textAlign: 'center' }}>📱 選擇 LINE 傳送　💻 儲存後傳圖</p>
             {/* 吉祥物 */}
             <img src="/mascot.png" alt="" style={{ width: 110, marginTop: 4, objectFit: 'contain', animation: 'mascotFloat 3s ease-in-out infinite', filter: 'drop-shadow(0 6px 16px rgba(201,78,122,0.25))' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
             {/* 手機版即時數據 */}
@@ -1048,7 +1049,7 @@ export default function CreatePage() {
 
       {wide ? (
         <div style={{ display: 'flex', gap: 16, maxWidth: 1220, margin: '0 auto', padding: '10px 14px', alignItems: 'stretch', height: 'calc(100dvh - 56px)', boxSizing: 'border-box' }}>
-          <div style={{ width: 288, flexShrink: 0, background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ width: 330, flexShrink: 0, background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {LeftPanel}
           </div>
           {CardCenter}
