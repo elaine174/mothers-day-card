@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useCallback, useEffect, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import type { Employee, InteractiveElement, PlacedDecoration, PlacedRobot } from '@/types';
 
 // ── 互動模式型別 ──────────────────────────────────────────────
@@ -49,11 +49,12 @@ const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     ref
   ) => {
     // containerRef 指向「外層」div，用於互動座標計算（與外部 posterRef 相同節點）
-    // 因為外層 div 與內層 div 的 BoundingClientRect 完全相同（inset:0），
-    // 所以用外層做座標計算結果一致
     const containerRef  = useRef<HTMLDivElement>(null);
     const interaction   = useRef<InteractionMode | null>(null);
     const pointerStart  = useRef<{ x: number; y: number } | null>(null);
+
+    // 角色選取狀態（內部管理）
+    const [charSelected, setCharSelected] = useState(false);
 
     // 穩定的合併 ref：把外部 posterRef 和內部 containerRef 都指向「外層」DOM 節點
     // html2canvas 截圖目標 = 外層 div（有 paddingBottom 提供明確高度）
@@ -124,9 +125,13 @@ const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           const dist = Math.hypot(clientX - start.x, clientY - start.y);
           if (dist < CLICK_THRESHOLD) {
             if (mode.type === 'robot-drag') {
+              // 點素材：切換選取狀態，同時取消角色選取
+              setCharSelected(false);
               onRobotSelect?.(selectedRobotId === mode.instanceId ? null : mode.instanceId);
             } else if (mode.type === 'char-drag') {
+              // 點角色：切換角色選取，同時取消素材選取
               onRobotSelect?.(null);
+              setCharSelected((prev) => !prev);
             }
           }
         }
@@ -164,12 +169,13 @@ const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     };
 
     const resizeHandle: React.CSSProperties = {
-      position: 'absolute', bottom: -5, right: -5,
-      width: 14, height: 14, borderRadius: '50%',
-      background: 'white', border: '2px solid rgba(255,105,180,0.7)',
+      position: 'absolute', bottom: -8, right: -8,
+      width: 22, height: 22, borderRadius: '50%',
+      background: 'white', border: '2.5px solid rgba(201,78,122,0.85)',
       cursor: 'se-resize', zIndex: 20,
-      boxShadow: '0 1px 5px rgba(255,105,180,0.35)',
+      boxShadow: '0 2px 8px rgba(201,78,122,0.4)',
       touchAction: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
     };
     const ignoreAttr = { 'data-html2canvas-ignore': 'true' } as Record<string, string>;
     const displayText = blessingText.slice(0, 72);
@@ -192,9 +198,11 @@ const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         {/* 內層：絕對定位填滿外層，overflow hidden 防止子元素溢出 */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
 
-          {/* ── 背景圖 ── */}
+          {/* ── 背景圖（點擊背景取消所有選取）── */}
           <img src={bgSrc} alt="card background" draggable={false}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, pointerEvents: 'none' }}
+            onMouseDown={() => { setCharSelected(false); onRobotSelect?.(null); }}
+            onTouchStart={() => { setCharSelected(false); onRobotSelect?.(null); }}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, cursor: 'default' }}
           />
 
           {/* ── Q版人物 ── */}
@@ -206,17 +214,29 @@ const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               left: `${characterPos.x}%`, top: `${characterPos.y}%`,
               width: `${characterPos.size}%`,
               transform: `translate(-50%, -50%) rotate(${characterPos.rotation}deg)`,
-              zIndex: 5, cursor: 'grab', touchAction: 'none',
+              zIndex: 5, cursor: charSelected ? 'grab' : 'pointer', touchAction: 'none',
             }}
           >
             <div style={{ position: 'absolute', inset: '-12%', borderRadius: '50%', background: `radial-gradient(circle, ${employee.themeColor}30 0%, transparent 70%)`, filter: 'blur(14px)', pointerEvents: 'none' }}/>
             <img src={employee.characterImage} alt={employee.name} draggable={false}
               style={{ width: '100%', height: 'auto', objectFit: 'contain', position: 'relative', zIndex: 1, filter: 'drop-shadow(0 6px 14px rgba(200,100,150,0.2))', pointerEvents: 'none' }}
             />
-            <div {...ignoreAttr} style={resizeHandle}
-              onMouseDown={(e) => startDrag(e, { type: 'char-resize', startX: e.clientX, startSize: characterPos.size })}
-              onTouchStart={(e) => startDrag(e, { type: 'char-resize', startX: e.touches[0].clientX, startSize: characterPos.size })}
-            />
+            {/* 選取框 + resize handle：只在選取時顯示 */}
+            {charSelected && (
+              <>
+                <div {...ignoreAttr} style={{
+                  position: 'absolute', inset: -4,
+                  border: '2px dashed rgba(201,78,122,0.7)',
+                  borderRadius: 6, pointerEvents: 'none', zIndex: 1,
+                }}/>
+                <div {...ignoreAttr} style={resizeHandle}
+                  onMouseDown={(e) => startDrag(e, { type: 'char-resize', startX: e.clientX, startSize: characterPos.size })}
+                  onTouchStart={(e) => startDrag(e, { type: 'char-resize', startX: e.touches[0].clientX, startSize: characterPos.size })}
+                >
+                  <span style={{ fontSize: 10, lineHeight: 1, userSelect: 'none', color: 'rgba(201,78,122,0.85)' }}>⤡</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* ── 多隻素材 ── */}
@@ -236,21 +256,25 @@ const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 }}
                 title="點選後可調整旋轉 ▪ 雙擊移除"
               >
-                {/* 選取框（截圖前會被清除）*/}
-                {isSelected && (
-                  <div {...ignoreAttr} style={{
-                    position: 'absolute', inset: -4,
-                    border: '2px dashed rgba(201,78,122,0.7)',
-                    borderRadius: 6, pointerEvents: 'none', zIndex: 1,
-                  }}/>
-                )}
                 <img src={robot.src} alt={robot.name} draggable={false}
                   style={{ width: '100%', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 10px rgba(180,80,130,0.18))', pointerEvents: 'none', display: 'block' }}
                 />
-                <div {...ignoreAttr} style={resizeHandle}
-                  onMouseDown={(e) => startDrag(e, { type: 'robot-resize', instanceId: robot.instanceId, startX: e.clientX, startSize: robot.size })}
-                  onTouchStart={(e) => startDrag(e, { type: 'robot-resize', instanceId: robot.instanceId, startX: e.touches[0].clientX, startSize: robot.size })}
-                />
+                {/* 選取框 + resize handle：只在選取時顯示 */}
+                {isSelected && (
+                  <>
+                    <div {...ignoreAttr} style={{
+                      position: 'absolute', inset: -4,
+                      border: '2px dashed rgba(201,78,122,0.7)',
+                      borderRadius: 6, pointerEvents: 'none', zIndex: 1,
+                    }}/>
+                    <div {...ignoreAttr} style={resizeHandle}
+                      onMouseDown={(e) => startDrag(e, { type: 'robot-resize', instanceId: robot.instanceId, startX: e.clientX, startSize: robot.size })}
+                      onTouchStart={(e) => startDrag(e, { type: 'robot-resize', instanceId: robot.instanceId, startX: e.touches[0].clientX, startSize: robot.size })}
+                    >
+                      <span style={{ fontSize: 10, lineHeight: 1, userSelect: 'none', color: 'rgba(201,78,122,0.85)' }}>⤡</span>
+                    </div>
+                  </>
+                )}
               </div>
             );
           })}

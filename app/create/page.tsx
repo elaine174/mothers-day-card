@@ -115,6 +115,9 @@ export default function CreatePage() {
   const [previewBlob,    setPreviewBlob]    = useState<Blob | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
+  // 強制全螢幕
+  const [isFullscreen, setIsFullscreen] = useState(true); // 預設 true 避免 SSR 閃爍
+
   // 引導 onboarding
   const [onboardingStep, setOnboardingStep] = useState<number>(-1); // -1 = 不顯示
 
@@ -164,6 +167,18 @@ export default function CreatePage() {
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // 強制全螢幕（桌機版）：進入或離開全螢幕時同步狀態
+  useEffect(() => {
+    const onFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    // 初始化：桌機才需要全螢幕
+    const isDesktop = window.innerWidth >= 860;
+    setIsFullscreen(!isDesktop || !!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
 
   // 初次引導
@@ -1160,6 +1175,45 @@ export default function CreatePage() {
                 {onboardingStep < ONBOARDING_STEPS.length - 1 ? '下一步 →' : '開始製作 🌸'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 強制全螢幕關卡（桌機版，未全螢幕時擋住畫面）── */}
+      {!isFullscreen && wide && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 950,
+          background: 'rgba(20,10,18,0.92)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 24,
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 24, padding: '36px 32px',
+            maxWidth: 380, width: '100%',
+            boxShadow: '0 24px 70px rgba(0,0,0,0.5)',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 52, marginBottom: 14 }}>🖥️</div>
+            <h2 style={{ margin: '0 0 10px', fontSize: 21, fontWeight: 800, color: C.text }}>
+              請使用全螢幕製作
+            </h2>
+            <p style={{ margin: '0 0 28px', fontSize: 13, color: C.sub, lineHeight: 1.8 }}>
+              本頁面需要<b style={{ color: C.accent }}>全螢幕模式</b>才能正常操作。<br/>
+              點下方按鈕即可進入，製作完成後按 <kbd style={{ background: '#F0EBF4', borderRadius: 5, padding: '1px 6px', fontSize: 12, border: `1px solid ${C.border}` }}>Esc</kbd> 離開。
+            </p>
+            <button
+              onClick={() => document.documentElement.requestFullscreen?.()}
+              style={{
+                width: '100%', padding: '15px 0', borderRadius: 14,
+                fontSize: 15, fontWeight: 800, color: '#fff',
+                background: `linear-gradient(135deg,${C.accent},#E0608A)`,
+                border: 'none', cursor: 'pointer',
+                boxShadow: `0 6px 22px ${C.accent}50`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 20 }}>📺</span> 進入全螢幕開始製作
+            </button>
           </div>
         </div>
       )}
