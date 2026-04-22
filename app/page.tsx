@@ -21,7 +21,6 @@ export default function LandingPage() {
 
   useEffect(() => {
     setDaysLeft(getDaysLeft());
-    // 偵測 Lark / LINE / WeChat 等 in-app 瀏覽器
     const ua = navigator.userAgent;
     const inApp = /Lark|BytedanceMicroApp|BytedanceWebview|MicroMessenger|FBAN|FBAV|Line\//.test(ua);
     setIsInApp(inApp);
@@ -30,7 +29,6 @@ export default function LandingPage() {
     window.addEventListener('resize', checkSize);
     const t = setTimeout(() => setReady(true), 100);
 
-    // 點連結進來就計一次造訪（session 內只算一次）
     if (!sessionStorage.getItem('md-visited')) {
       sessionStorage.setItem('md-visited', '1');
       fetch('/api/stats', {
@@ -39,7 +37,6 @@ export default function LandingPage() {
         body: JSON.stringify({ type: 'visit' }),
       }).catch(() => {});
     }
-    // 取得訪問數顯示在首頁
     fetch('/api/stats').then(r => r.json()).then(d => setVisits(d.visits || 0)).catch(() => {});
 
     return () => { clearTimeout(t); window.removeEventListener('resize', checkSize); };
@@ -51,6 +48,28 @@ export default function LandingPage() {
       position: 'relative', overflow: 'hidden',
       fontFamily: '"Noto Sans TC","PingFang TC",system-ui,sans-serif',
     }}>
+
+      {/* ── 背景圖：全螢幕 ── */}
+      <img
+        src="/landing-hero.png"
+        alt="Mother's Day"
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center top',
+          zIndex: 0,
+        }}
+      />
+
+      {/* ── 底部漸層遮罩（讓下方 bar 自然融入）── */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        height: isMobile ? '28%' : '24%',
+        background: 'linear-gradient(to top, rgba(252,207,230,0.98) 0%, rgba(252,220,238,0.7) 55%, transparent 100%)',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }}/>
 
       {/* ── Lark / In-app 瀏覽器提示 ── */}
       {isInApp && (
@@ -77,77 +96,83 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* ── 背景圖：限制最大顯示高度，桌機不全占滿螢幕 ── */}
-      <img
-        src="/landing-hero.png"
-        alt="Mother's Day AI Blessing Studio"
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center top',
-          zIndex: 0,
-        }}
-      />
+      {/* ── 右上角：倒數 + 人數（並排）── */}
+      {ready && (
+        <div style={{
+          position: 'absolute',
+          top: isMobile ? 14 : 18,
+          right: isMobile ? 14 : 24,
+          zIndex: 20,
+          display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8,
+          opacity: ready ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+        }}>
+          {/* 共用 badge 樣式 */}
+          {daysLeft > 0 && (
+            <div style={{
+              padding: isMobile ? '5px 11px' : '6px 14px',
+              borderRadius: 100,
+              background: 'rgba(255,255,255,0.88)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid rgba(201,78,122,0.25)',
+              boxShadow: '0 4px 18px rgba(201,78,122,0.12)',
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <span style={{ fontSize: isMobile ? 11 : 12 }}>🗓️</span>
+              <span style={{ fontSize: isMobile ? 10 : 11, color: '#A07090' }}>距母親節</span>
+              <span style={{ fontSize: isMobile ? 17 : 20, fontWeight: 900, color: '#C94E7A', lineHeight: 1 }}>{daysLeft}</span>
+              <span style={{ fontSize: isMobile ? 10 : 11, color: '#A07090' }}>天</span>
+            </div>
+          )}
+          {daysLeft === 0 && (
+            <div style={{
+              padding: isMobile ? '5px 11px' : '6px 14px', borderRadius: 100,
+              background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(12px)',
+              border: '1.5px solid rgba(201,78,122,0.25)',
+              boxShadow: '0 4px 18px rgba(201,78,122,0.12)',
+            }}>
+              <span style={{ fontSize: isMobile ? 11 : 12, fontWeight: 800, color: '#C94E7A' }}>🌸 今天是母親節！</span>
+            </div>
+          )}
+          {visits > 0 && (
+            <div style={{
+              padding: isMobile ? '5px 11px' : '6px 14px',
+              borderRadius: 100,
+              background: 'rgba(255,255,255,0.88)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid rgba(201,78,122,0.25)',
+              boxShadow: '0 4px 18px rgba(201,78,122,0.12)',
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <span style={{ fontSize: isMobile ? 10 : 11, color: '#A07090' }}>已上線製作</span>
+              <span style={{ fontSize: isMobile ? 17 : 20, fontWeight: 900, color: '#C94E7A', lineHeight: 1 }}>{visits.toLocaleString()}</span>
+              <span style={{ fontSize: isMobile ? 10 : 11, color: '#A07090' }}>人</span>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* ── 底部漸層遮罩 ── */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: isMobile ? '45%' : '38%',
-        background: 'linear-gradient(to top, rgba(255,215,235,0.96) 0%, rgba(255,235,248,0.7) 55%, transparent 100%)',
-        zIndex: 1,
-      }}/>
-
-      {/* ── 主要內容：固定在底部，不會被推出螢幕 ── */}
+      {/* ── 底部：按鈕 + 說明文字（垂直置中） ── */}
       <div style={{
         position: 'absolute',
-        bottom: isMobile ? '5vh' : '6vh',
+        bottom: isMobile ? 18 : 26,
         left: 0, right: 0,
         zIndex: 10,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '0 20px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
         opacity: ready ? 1 : 0,
         transform: ready ? 'translateY(0)' : 'translateY(16px)',
         transition: 'all 0.6s cubic-bezier(0.34,1.56,0.64,1)',
       }}>
 
-        {/* 倒數計時 */}
-        {daysLeft > 0 && (
-          <div style={{
-            marginBottom: isMobile ? 14 : 18,
-            padding: isMobile ? '6px 16px' : '7px 20px', borderRadius: 100,
-            background: 'rgba(255,255,255,0.88)',
-            backdropFilter: 'blur(10px)',
-            border: '1.5px solid rgba(201,78,122,0.22)',
-            display: 'flex', alignItems: 'center', gap: 7,
-            boxShadow: '0 3px 16px rgba(201,78,122,0.1)',
-          }}>
-            <span style={{ fontSize: isMobile ? 13 : 15 }}>🗓️</span>
-            <span style={{ fontSize: isMobile ? 11 : 13, color: '#A07090' }}>距母親節還有</span>
-            <span style={{ fontSize: isMobile ? 18 : 21, fontWeight: 900, color: '#C94E7A', lineHeight: 1 }}>{daysLeft}</span>
-            <span style={{ fontSize: isMobile ? 11 : 13, color: '#A07090' }}>天</span>
-          </div>
-        )}
-        {daysLeft === 0 && (
-          <div style={{
-            marginBottom: isMobile ? 14 : 18,
-            padding: isMobile ? '6px 16px' : '7px 20px', borderRadius: 100,
-            background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)',
-            border: '1.5px solid rgba(201,78,122,0.3)',
-          }}>
-            <span style={{ fontSize: isMobile ? 13 : 15, fontWeight: 800, color: '#C94E7A' }}>🌸 今天是母親節！快去傳卡片給媽媽吧！</span>
-          </div>
-        )}
-
-        {/* CTA 按鈕 */}
+        {/* CTA 按鈕（稍小） */}
         <button
           onClick={() => router.push('/create')}
           onMouseEnter={() => setBtnHover(true)}
           onMouseLeave={() => setBtnHover(false)}
           style={{
-            padding: isMobile ? '13px 36px' : '15px 46px',
+            padding: isMobile ? '10px 28px' : '12px 36px',
             borderRadius: 100,
-            fontSize: isMobile ? 15 : 17,
+            fontSize: isMobile ? 14 : 15,
             fontWeight: 900,
             color: '#fff',
             background: btnHover
@@ -156,43 +181,29 @@ export default function LandingPage() {
             border: 'none',
             cursor: 'pointer',
             boxShadow: btnHover
-              ? '0 10px 36px rgba(201,78,122,0.55), 0 0 0 5px rgba(201,78,122,0.12)'
-              : '0 6px 26px rgba(201,78,122,0.4)',
+              ? '0 8px 28px rgba(201,78,122,0.55), 0 0 0 4px rgba(201,78,122,0.12)'
+              : '0 5px 20px rgba(201,78,122,0.4)',
             transform: btnHover ? 'translateY(-2px) scale(1.02)' : 'translateY(0) scale(1)',
             transition: 'all 0.2s cubic-bezier(0.34,1.56,0.64,1)',
-            display: 'flex', alignItems: 'center', gap: 9,
+            display: 'flex', alignItems: 'center', gap: 7,
             letterSpacing: '0.02em',
           }}
         >
-          <span style={{ fontSize: isMobile ? 17 : 20 }}>🌸</span>
+          <span style={{ fontSize: isMobile ? 14 : 16 }}>🌸</span>
           開始製作賀卡
-          <span style={{ fontSize: isMobile ? 16 : 18 }}>→</span>
+          <span style={{ fontSize: isMobile ? 13 : 15 }}>→</span>
         </button>
 
+        {/* 說明文字 */}
         <p style={{
-          marginTop: isMobile ? 10 : 12,
+          margin: 0,
           fontSize: isMobile ? 10 : 11,
-          color: 'rgba(160,112,144,0.8)',
-          textAlign: 'center', lineHeight: 1.7,
+          color: 'rgba(140,70,110,0.88)',
+          textAlign: 'center',
+          lineHeight: 1.6,
         }}>
           選角色 ・ 換背景 ・ 一鍵生成祝福語 ・ 分享 LINE
         </p>
-
-        {/* 造訪人數 */}
-        {visits > 0 && (
-          <div style={{
-            marginTop: isMobile ? 10 : 12,
-            display: 'flex', alignItems: 'center', gap: 5,
-            padding: '4px 14px', borderRadius: 100,
-            background: 'rgba(255,255,255,0.7)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(201,78,122,0.15)',
-          }}>
-            <span style={{ fontSize: isMobile ? 11 : 12 }}>🌸</span>
-            <span style={{ fontSize: isMobile ? 11 : 12, color: '#C94E7A', fontWeight: 700 }}>{visits.toLocaleString()}</span>
-            <span style={{ fontSize: isMobile ? 10 : 11, color: '#A07090' }}>人已來製作</span>
-          </div>
-        )}
 
       </div>
     </div>
