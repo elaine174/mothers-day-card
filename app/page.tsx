@@ -49,18 +49,21 @@ export default function LandingPage() {
       fontFamily: '"Noto Sans TC","PingFang TC",system-ui,sans-serif',
     }}>
 
-      {/* ── 背景圖：全螢幕 ── */}
-      <img
-        src="/landing-hero.png"
-        alt="Mother's Day"
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center top',
-          zIndex: 0,
-        }}
-      />
+      {/* ── 背景圖：全螢幕（WebP 優先，JPG 備援）── */}
+      <picture>
+        <source srcSet="/landing-hero.webp" type="image/webp" />
+        <img
+          src="/landing-hero.jpg"
+          alt="Mother's Day"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center top',
+            zIndex: 0,
+          }}
+        />
+      </picture>
 
       {/* ── 底部漸層遮罩（讓下方 bar 自然融入）── */}
       <div style={{
@@ -152,7 +155,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* ── 底部：按鈕 + 說明文字（垂直置中） ── */}
+{/* ── 底部：按鈕 + 說明文字（垂直置中） ── */}
       <div style={{
         position: 'absolute',
         bottom: isMobile ? 18 : 26,
@@ -194,7 +197,7 @@ export default function LandingPage() {
           <span style={{ fontSize: isMobile ? 13 : 15 }}>→</span>
         </button>
 
-        {/* 說明文字 */}
+        {/* 說明文字（置中） */}
         <p style={{
           margin: 0,
           fontSize: isMobile ? 10 : 11,
@@ -203,6 +206,17 @@ export default function LandingPage() {
           lineHeight: 1.6,
         }}>
           選角色 ・ 換背景 ・ 一鍵生成祝福語 ・ 分享 LINE
+        </p>
+
+        {/* 署名（置中） */}
+        <p style={{
+          margin: 0,
+          fontSize: isMobile ? 10 : 11,
+          fontWeight: 700,
+          color: 'rgba(255,255,255,0.9)',
+          textAlign: 'center',
+        }}>
+          🐣 管理中心小菜鳥出品 × 天網數位科技有限公司
         </p>
 
       </div>

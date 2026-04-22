@@ -757,6 +757,11 @@ export default function CreatePage() {
           fontSize: 10, color: C.accent, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap',
         }}>↺ 重置</button>
       </div>
+      <div style={{ textAlign: 'center', marginTop: 2 }}>
+        <span style={{ fontSize: 10, color: '#C06090', fontWeight: 600, letterSpacing: '0.02em' }}>
+          🐣 管理中心小菜鳥出品 × 天網數位科技有限公司
+        </span>
+      </div>
     </div>
   );
 
