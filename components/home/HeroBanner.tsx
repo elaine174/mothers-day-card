@@ -144,7 +144,7 @@ export default function HeroBanner() {
       {/* ── 主視覺背景圖 ── */}
       <div style={{
         position:'absolute', inset:0,
-        backgroundImage: "url('/主視覺.png')",
+        backgroundImage: "url('/主視覺.webp')",
         backgroundSize:'cover',
         backgroundPosition:'center top',
         backgroundRepeat:'no-repeat',

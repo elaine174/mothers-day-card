@@ -9,9 +9,9 @@ import type { Employee, InteractiveElement, PlacedDecoration, PlacedRobot } from
 
 // ── 背景模板 ─────────────────────────────────────────────────────
 const BG_TEMPLATES = [
-  { id: 'bg1', src: '/bg-1.png', label: '模板一' },
-  { id: 'bg2', src: '/bg-2.png', label: '模板二' },
-  { id: 'bg3', src: '/bg-3.png', label: '模板三' },
+  { id: 'bg1', src: '/bg-1.webp', label: '模板一' },
+  { id: 'bg2', src: '/bg-2.webp', label: '模板二' },
+  { id: 'bg3', src: '/bg-3.webp', label: '模板三' },
 ];
 
 const THEMES: { id: BlessingTheme; label: string; icon: string }[] = [
@@ -667,7 +667,7 @@ export default function CreatePage() {
           {/* 吉祥物 — 填滿剩餘空間 */}
           <div style={{ flex: 1, minHeight: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img
-              src="/mascot.png"
+              src="/mascot.webp"
               alt=""
               style={{
                 width: '100%', height: '100%', objectFit: 'contain',
@@ -970,7 +970,7 @@ export default function CreatePage() {
               <span style={{ fontSize: 20 }}>🌸</span> {previewLoading ? '生成中…' : '預覽 & 分享卡片'}
             </button>
             {/* 吉祥物 */}
-            <img src="/mascot.png" alt="" style={{ width: 110, marginTop: 4, objectFit: 'contain', animation: 'mascotFloat 3s ease-in-out infinite', filter: 'drop-shadow(0 6px 16px rgba(201,78,122,0.25))' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
+            <img src="/mascot.webp" alt="" style={{ width: 110, marginTop: 4, objectFit: 'contain', animation: 'mascotFloat 3s ease-in-out infinite', filter: 'drop-shadow(0 6px 16px rgba(201,78,122,0.25))' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
             {/* 手機版即時數據 */}
             {(stats.visits > 0 || stats.saves > 0) && (
               <div style={{ display: 'flex', gap: 10, width: '100%' }}>
@@ -1014,7 +1014,7 @@ export default function CreatePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* 公司 Logo */}
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="Skynet"
             style={{ height: wide ? 42 : 32, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
           />

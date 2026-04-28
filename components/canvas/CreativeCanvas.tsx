@@ -264,7 +264,7 @@ export default function CreativeCanvas({ employee }: CreativeCanvasProps) {
                   blessingText={blessingText}
                   showName={showName}
                   fontSize={13}
-                  bgSrc="/bg-1.png"
+                  bgSrc="/bg-1.webp"
                   decorations={decorations}
                   robots={robots}
                   characterPos={characterPos}

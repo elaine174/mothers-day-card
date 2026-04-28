@@ -3,18 +3,18 @@
 import type { RobotOption } from '@/types';
 
 export const ROBOT_OPTIONS: RobotOption[] = [
-  { id: 'rabbit',   name: '兔子',    src: '/robots/兔子.png',    defaultRotation: -6 },
-  { id: 'angel',    name: '小天使',  src: '/robots/小天使.png',  defaultRotation: -3 },
-  { id: 'dog',      name: '狗狗',    src: '/robots/狗狗.png',    defaultRotation: -4 },
-  { id: 'gift',     name: '禮物盒',  src: '/robots/禮物盒.png',  defaultRotation: 6  },
-  { id: 'cat',      name: '貓咪',    src: '/robots/貓咪.png',    defaultRotation: -5 },
-  { id: 'balloon',  name: '造型氣球', src: '/robots/造型氣球.png', defaultRotation: 4  },
-  { id: 'cloud',    name: '雲朵',    src: '/robots/雲朵.png',    defaultRotation: -3 },
-  { id: 'bear',     name: '小熊熊',  src: '/robots/小熊熊.png',  defaultRotation: 5  },
-  { id: 'heartbox', name: '愛心盒',  src: '/robots/愛心盒.png',  defaultRotation: -4 },
-  { id: 'flower',   name: '鮮花',    src: '/robots/鮮花.png',    defaultRotation: 8  },
-  { id: 'rainbow',  name: '彩虹',    src: '/robots/彩虹.png',    defaultRotation: 5  },
-  { id: 'star',     name: '星星',    src: '/robots/星星.png',    defaultRotation: 8  },
+  { id: 'rabbit',   name: '兔子',    src: '/robots/兔子.webp',    defaultRotation: -6 },
+  { id: 'angel',    name: '小天使',  src: '/robots/小天使.webp',  defaultRotation: -3 },
+  { id: 'dog',      name: '狗狗',    src: '/robots/狗狗.webp',    defaultRotation: -4 },
+  { id: 'gift',     name: '禮物盒',  src: '/robots/禮物盒.webp',  defaultRotation: 6  },
+  { id: 'cat',      name: '貓咪',    src: '/robots/貓咪.webp',    defaultRotation: -5 },
+  { id: 'balloon',  name: '造型氣球', src: '/robots/造型氣球.webp', defaultRotation: 4  },
+  { id: 'cloud',    name: '雲朵',    src: '/robots/雲朵.webp',    defaultRotation: -3 },
+  { id: 'bear',     name: '小熊熊',  src: '/robots/小熊熊.webp',  defaultRotation: 5  },
+  { id: 'heartbox', name: '愛心盒',  src: '/robots/愛心盒.webp',  defaultRotation: -4 },
+  { id: 'flower',   name: '鮮花',    src: '/robots/鮮花.webp',    defaultRotation: 8  },
+  { id: 'rainbow',  name: '彩虹',    src: '/robots/彩虹.webp',    defaultRotation: 5  },
+  { id: 'star',     name: '星星',    src: '/robots/星星.webp',    defaultRotation: 8  },
   { id: 'none',     name: '不加素材', src: '',                   defaultRotation: 0  },
 ];
 
