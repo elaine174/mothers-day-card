@@ -58,6 +58,8 @@ export default function EmployeeCard({
           src={employee.characterImage}
           alt={`${employee.name}的Q版角色`}
           className="w-full h-full object-contain"
+          loading="lazy"
+          decoding="async"
         />
 
         {/* hover 發光效果 */}

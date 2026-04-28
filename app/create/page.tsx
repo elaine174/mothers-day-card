@@ -513,7 +513,7 @@ export default function CreatePage() {
                 boxShadow: on ? `0 0 0 2px ${C.accent}30` : 'none',
               }}>
                 <div style={{ width: '100%', aspectRatio: '1 / 1.2', borderRadius: 10, overflow: 'hidden', background: '#F5EEF2' }}>
-                  <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
+                  <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" decoding="async"/>
                 </div>
                 <span style={{ fontSize: 10, fontWeight: on ? 700 : 400, color: on ? C.accent : C.sub, whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: '100%', textOverflow: 'ellipsis' }}>{emp.name}</span>
               </button>
@@ -543,7 +543,7 @@ export default function CreatePage() {
               onMouseEnter={(e) => { e.currentTarget.style.background = C.light; e.currentTarget.style.borderColor = C.pink; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#F9F4F7'; e.currentTarget.style.borderColor = C.border; }}
             >
-              <img src={r.src} alt={r.name} style={{ width: 54, height: 54, objectFit: 'contain' }}/>
+              <img src={r.src} alt={r.name} style={{ width: 54, height: 54, objectFit: 'contain' }} loading="lazy" decoding="async"/>
               <span style={{ fontSize: 11, color: C.sub, textAlign: 'center', lineHeight: 1.2 }}>{r.name}</span>
             </button>
           ))}
@@ -807,7 +807,7 @@ export default function CreatePage() {
                 boxShadow: on ? `0 0 0 2px ${C.accent}30` : 'none',
               }}>
                 <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', background: '#F5EEF2' }}>
-                  <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }}/>
+                  <img src={emp.characterImage} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" decoding="async"/>
                 </div>
                 <span style={{ fontSize: 9, fontWeight: on ? 700 : 500, color: on ? C.accent : C.sub }}>{emp.name}</span>
               </button>
@@ -887,7 +887,7 @@ export default function CreatePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7 }}>
               {ROBOT_OPTIONS.filter((r) => r.id !== 'none').map((r) => (
                 <button key={r.id} onClick={() => addRobot(r.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '9px 4px', borderRadius: 12, background: '#F9F4F7', border: `1px solid ${C.border}`, cursor: 'pointer' }}>
-                  <img src={r.src} alt={r.name} style={{ width: 48, height: 48, objectFit: 'contain' }}/>
+                  <img src={r.src} alt={r.name} style={{ width: 48, height: 48, objectFit: 'contain' }} loading="lazy" decoding="async"/>
                   <span style={{ fontSize: 11, color: C.sub, textAlign: 'center' }}>{r.name}</span>
                 </button>
               ))}
