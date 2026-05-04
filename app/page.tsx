@@ -216,7 +216,7 @@ export default function LandingPage() {
           color: 'rgba(255,255,255,0.9)',
           textAlign: 'center',
         }}>
-          🐣 管理中心小菜鳥出品 × 天網數位科技有限公司
+          🐣 管理中心小菜鳥出品 × 天網數位有限公司
         </p>
 
       </div>

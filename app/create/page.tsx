@@ -759,7 +759,7 @@ export default function CreatePage() {
       </div>
       <div style={{ textAlign: 'center', marginTop: 2 }}>
         <span style={{ fontSize: 10, color: '#C06090', fontWeight: 600, letterSpacing: '0.02em' }}>
-          🐣 管理中心小菜鳥出品 × 天網數位科技有限公司
+          🐣 管理中心小菜鳥出品 × 天網數位有限公司
         </span>
       </div>
     </div>
